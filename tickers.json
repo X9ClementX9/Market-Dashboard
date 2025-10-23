@@ -1,0 +1,74 @@
+{
+  "ticker_filename_market": {
+    "SPY": "Data/spy.csv",
+    "DX-Y.NYB": "Data/usd.csv",
+    "CL=F": "Data/oil.csv",
+    "ZW=F": "Data/wheat.csv",
+    "GC=F": "Data/gold.csv"
+  },
+
+  "ticker_alias": {
+    "SPY": "S&P 500",
+    "DX-Y.NYB": "Dollar Index",
+    "CL=F": "Crude Oil",
+    "ZW=F": "Wheat",
+    "GC=F": "Gold",
+    "^VIX": "VIX",
+    "^GVZ": "Gold Volatility",
+    "^EVZ": "Euro Volatility",
+    "MOVE": "MOVE Index"
+  },
+
+  "ticker_vol_termstru": {
+    "S&P 500": "SPY",
+    "Nasdaq-100": "QQQ",
+    "Dow Jones": "DIA",
+    "Gold": "GLD",
+    "Silver": "SLV",
+    "Crude Oil": "USO",
+    "US Treasury Bonds 20+ Years": "TLT",
+    "US Energy": "XLE"
+  },
+
+  "ticker_fut_termstru": {
+    "S&P 500": "ES",
+    "Nasdaq-100": "NQ",
+    "Dow Jones": "YM",
+    "Gold": "GC",
+    "Silver": "SI",
+    "Crude Oil": "CL"
+  },
+
+  "setup_term_stru_future": {
+      "CME": {
+         "Expiration_date_codes": ["H", "M", "U", "Z"],
+         "ticker_ending": ".CME",
+         "Tickers": {
+               "ES": "S&P500",
+               "NQ": "Nasdaq100"
+         }
+      },
+      "NYMEX": {
+         "Expiration_date_codes": ["F", "G", "H", "J", "K", "M", "N", "Q", "U", "V", "X", "Z"],
+         "ticker_ending": ".NYM",
+         "Tickers": {
+               "CL": "CrudeOil"
+         }
+      },
+      "COMEX": {
+         "Expiration_date_codes": ["G", "J", "M", "Q", "V", "Z"],
+         "ticker_ending": ".CMX",
+         "Tickers": {
+               "GC": "Gold",
+               "SI": "Silver"
+         }
+      },
+      "CBT": {
+        "Expiration_date_codes": ["H", "M", "U", "Z"],
+        "ticker_ending": ".CBT",
+        "Tickers": {
+            "YM": "Dow Jones"
+        }
+      }
+   }
+}
