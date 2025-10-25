@@ -1,0 +1,19 @@
+# Environnements
+.venv/
+env/
+__pycache__/
+
+# Config et secrets
+.env
+
+# Fichiers système
+.DS_Store
+
+# Cache
+__pycache__
+
+# Pdf
+dashboard_project.pdf
+
+# Fichier test
+test.py
