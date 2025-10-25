@@ -46,7 +46,6 @@ perf_selection = st.sidebar.multiselect(
     all_tickers,
     default=ticker_default_perf,
     format_func=lambda t: ticker_alias.get(t, t), # affiche l’alias dans la liste
-    key="perf_selection"
 )
 # Date selection
 period_selection = st.sidebar.selectbox(
@@ -54,7 +53,6 @@ period_selection = st.sidebar.selectbox(
     ["5D", "1M", "6M", "YTD", "1Y", "5Y", "MAX"],
     index=5,  # par défaut "YTD"
     on_change= st.cache_data.clear(),
-    key="period_selection"
 )
 
 today = pd.Timestamp.today().normalize()
@@ -94,7 +92,6 @@ alias_selection_termStru = st.sidebar.multiselect(
     "Asset",
     options=aliases,
     default=st.session_state.alias_selection_termStru,
-    key="alias_selection_termStru",
 )
 
 
