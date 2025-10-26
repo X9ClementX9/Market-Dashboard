@@ -84,3 +84,67 @@ def ticker_in_date(year, expiration_code): #Tranform future expriration code int
     }
     date = pd.Timestamp(year=int(year), month=int(dict_expi_code[expiration_code]), day=1)
     return date.strftime("%Y-%m")
+
+
+
+##############################################################################
+
+                            ### Market Regime ###                              
+
+##############################################################################
+
+def close_period(start, last_day, period, data_frame):# Ferme le dernier segment si ce n'étais pas le cas
+    if start != None:
+        end = data_frame.iloc[last_day].name
+        period.append({ "start": start, "end": end, "label": "GrowthHigh" })
+
+def join_short_period(period, nbr_days_fusion):    # Join les petites periodes de temps (fausse sortie)
+    i = 0
+    while i != len(period) - 2:
+        if pd.Timestamp(period[i+1]["start"]) - pd.Timestamp(period[i]["end"]) <= pd.Timedelta(days=nbr_days_fusion):
+            period[i]["end"] = period[i+1]["end"]
+            period.remove(period[i+1])
+        else : i += 1
+
+def market_regime(day, treeshold_entry_increase, treshold_leave_increase, treeshold_entry_decrease, treshold_leave_decrease, nbr_days_fusion, data_frame):
+
+    increase_period = []
+    decrease_period = []
+    start_increase = None
+    start_decrease = None
+    last_day = data_frame.shape[0] - 1
+    performance_last = (data_frame.iloc[day-1].iloc[0] - data_frame.iloc[day-64].iloc[0]) / data_frame.iloc[day-64].iloc[0]
+
+    while day < last_day:
+        performance = (data_frame.iloc[day].iloc[0] - data_frame.iloc[day-63].iloc[0]) / data_frame.iloc[day-63].iloc[0]
+        
+        # Condition d'entrée Increase
+        if performance >= treeshold_entry_increase and performance_last >= treeshold_entry_increase and start_increase == None: 
+            start_increase = data_frame.iloc[day].name
+        
+        # Condition pour sortie Increase
+        elif performance < treshold_leave_increase and performance_last < treshold_leave_increase and start_increase != None:
+            end = data_frame.iloc[day].name
+            increase_period.append({ "start": start_increase, "end": end, "label": "GrowthHigh" })
+            start_increase = None
+
+        # Condition d'entrée Decrease
+        elif performance <= treeshold_entry_decrease and performance_last <= treeshold_entry_decrease and start_decrease == None: 
+            start_decrease = data_frame.iloc[day].name
+        
+        # Condition pour sortie Decrease
+        elif performance > treshold_leave_decrease and performance_last > treshold_leave_decrease and start_decrease != None:
+            end = data_frame.iloc[day].name
+            decrease_period.append({ "start": start_decrease, "end": end, "label": "GrowthLow" })
+            start_decrease = None
+
+        day += 1
+        performance_last = performance
+
+    close_period(start_increase, last_day, increase_period, data_frame)
+    close_period(start_decrease, last_day, decrease_period, data_frame)
+
+    join_short_period(increase_period, nbr_days_fusion)
+    join_short_period(decrease_period, nbr_days_fusion)
+
+    return increase_period, decrease_period
