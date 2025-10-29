@@ -19,6 +19,10 @@ import json
 
 ##############################################################################
 
+def download_solo_ticker(ticker):
+    data = yf.download(ticker,progress=False, period="max", auto_adjust=True)['Close']
+    data.to_csv("CPI.csv")
+
 def json_dict(dict_name, file_name):    #Récupère un dict dans un fichier json
     with open(file_name, "r") as f:
         data = json.load(f)
@@ -35,7 +39,7 @@ def term_structure(ticker, dict_name, file_name):   #Récupère la term structur
 
 def download_data(dict_name, file_name, destination_file):      #Télécharge les données de yfinance et les sauvegarde dans un csv
     ticker_dict = json_dict(dict_name, file_name)
-    data_merge = pd.concat([yf.download(ticker,progress=False, period="max")['Close'] for ticker in ticker_dict], axis=1)
+    data_merge = pd.concat([yf.download(ticker,progress=False, period="max", auto_adjust=True)['Close'] for ticker in ticker_dict], axis=1)
     data_merge.to_csv(destination_file)
 
 
@@ -93,58 +97,96 @@ def ticker_in_date(year, expiration_code): #Tranform future expriration code int
 
 ##############################################################################
 
-def close_period(start, last_day, period, data_frame):# Ferme le dernier segment si ce n'étais pas le cas
-    if start != None:
+def close_period(start_increase, start_decrease, last_day, period, data_frame, regime_type):# Ferme le dernier segment si ce n'étais pas le cas
+    if start_increase != None:
         end = data_frame.iloc[last_day].name
-        period.append({ "start": start, "end": end, "label": "GrowthHigh" })
+        period.append({ "start": start_increase, "end": end, "label": f"{regime_type}{"High"}" })
+    if start_decrease != None:
+        end = data_frame.iloc[last_day].name
+        period.append({ "start": start_decrease, "end": end, "label": f"{regime_type}{"Low"}" })    
 
 def join_short_period(period, nbr_days_fusion):    # Join les petites periodes de temps (fausse sortie)
     i = 0
     while i != len(period) - 2:
-        if pd.Timestamp(period[i+1]["start"]) - pd.Timestamp(period[i]["end"]) <= pd.Timedelta(days=nbr_days_fusion):
+        if pd.Timestamp(period[i+1]["start"]) - pd.Timestamp(period[i]["end"]) <= pd.Timedelta(days=nbr_days_fusion) and period[i+1]["label"] == period[i]["label"]:
             period[i]["end"] = period[i+1]["end"]
             period.remove(period[i+1])
         else : i += 1
 
-def market_regime(day, treeshold_entry_increase, treshold_leave_increase, treeshold_entry_decrease, treshold_leave_decrease, nbr_days_fusion, data_frame):
+def market_regime(focus_period, treeshold_entry_increase, treshold_leave_increase, treeshold_entry_decrease, treshold_leave_decrease, nbr_days_fusion, ticker, file_path, regime_type):
 
-    increase_period = []
-    decrease_period = []
+    data_frame = get_ticker_data(ticker, file_path)
+    period = []
     start_increase = None
     start_decrease = None
     last_day = data_frame.shape[0] - 1
-    performance_last = (data_frame.iloc[day-1].iloc[0] - data_frame.iloc[day-64].iloc[0]) / data_frame.iloc[day-64].iloc[0]
+    performance_last = (data_frame.iloc[focus_period-1].iloc[0] - data_frame.iloc[0].iloc[0]) / data_frame.iloc[0].iloc[0]
+    day = focus_period
 
     while day < last_day:
-        performance = (data_frame.iloc[day].iloc[0] - data_frame.iloc[day-63].iloc[0]) / data_frame.iloc[day-63].iloc[0]
+        performance = (data_frame.iloc[day].iloc[0] - data_frame.iloc[day-(focus_period-1)].iloc[0]) / data_frame.iloc[day-(focus_period-1)].iloc[0]
         
         # Condition d'entrée Increase
-        if performance >= treeshold_entry_increase and performance_last >= treeshold_entry_increase and start_increase == None: 
+        if performance >= treeshold_entry_increase and performance_last >= treeshold_entry_increase and start_increase == None:
             start_increase = data_frame.iloc[day].name
         
         # Condition pour sortie Increase
         elif performance < treshold_leave_increase and performance_last < treshold_leave_increase and start_increase != None:
             end = data_frame.iloc[day].name
-            increase_period.append({ "start": start_increase, "end": end, "label": "GrowthHigh" })
+            period.append({"start": pd.Timestamp(start_increase).strftime("%Y-%m-%d"), "end": pd.Timestamp(end).strftime("%Y-%m-%d"), "label": f"{regime_type}{"High"}"})
             start_increase = None
 
         # Condition d'entrée Decrease
-        elif performance <= treeshold_entry_decrease and performance_last <= treeshold_entry_decrease and start_decrease == None: 
+        elif performance <= treeshold_entry_decrease and performance_last <= treeshold_entry_decrease and start_decrease == None:
             start_decrease = data_frame.iloc[day].name
         
         # Condition pour sortie Decrease
         elif performance > treshold_leave_decrease and performance_last > treshold_leave_decrease and start_decrease != None:
             end = data_frame.iloc[day].name
-            decrease_period.append({ "start": start_decrease, "end": end, "label": "GrowthLow" })
+            period.append({ "start": pd.Timestamp(start_decrease).strftime("%Y-%m-%d"), "end": pd.Timestamp(end).strftime("%Y-%m-%d"), "label": f"{regime_type}{"Low"}"})
             start_decrease = None
 
         day += 1
         performance_last = performance
 
-    close_period(start_increase, last_day, increase_period, data_frame)
-    close_period(start_decrease, last_day, decrease_period, data_frame)
+    close_period(start_increase, start_decrease, last_day, period, data_frame, regime_type)
 
-    join_short_period(increase_period, nbr_days_fusion)
-    join_short_period(decrease_period, nbr_days_fusion)
+    join_short_period(period, nbr_days_fusion)
 
-    return increase_period, decrease_period
+    return period
+
+def download_market_regime():
+    download_solo_ticker("TIP")
+    for regime in ["Growth", "Inflation"]:
+
+        #regime_dict = json_dict(regime, "market_regime.json")
+        
+        with open("market_regime.json", "r") as f:
+            regime_dict = json.load(f)
+
+        regime_dict[regime]["data"] = market_regime(*regime_dict[regime]["params"])
+
+        with open("market_regime.json", "w") as f:
+            json.dump(regime_dict, f, indent=3)
+
+def extract_regime(dict_period, label):   #Extract a unique market regime
+    regime = []
+    for dictionary in dict_period:
+        if dictionary["label"] == label:
+            regime.append(dictionary)
+    return regime
+
+def inter_regime(periods1, periods2, label):
+    x = y = 0
+    intersection_period = []
+    while x < len(periods1) and y < len(periods2):
+        start = max(periods1[x]["start"], periods2[y]["start"])
+        end = min(periods1[x]["end"], periods2[y]["end"])
+        if end > start:
+            dict_to_add = {"start": start, "end": end, "label": label}
+            intersection_period.append(dict_to_add)
+        if periods1[x]["end"] < periods2[y]["end"]:
+            x += 1
+        else:
+            y += 1
+    return intersection_period

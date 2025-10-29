@@ -1,5 +1,4 @@
 from datetime import date
-from email.policy import default
 import streamlit as st
 from helper import *
 import pandas as pd
@@ -7,6 +6,7 @@ import matplotlib.pyplot as plt
 from term_structure import *
 import plotly.express as px
 import altair as alt
+import plotly.graph_objects as go
 
 #########################################
                # SETUP
@@ -17,6 +17,7 @@ st.set_page_config(page_title="Market Dashboard", layout="wide")
 ticker_default_perf = ["CL=F", "ZW=F", "GC=F"]
 date_default_perf = "5Y"
 ticker_default_termstru = ["S&P 500", "Gold", "Silver","Crude Oil"]
+regime_default = ["Overheating", "Stagflation"]
 
 ticker_filename_market = json_dict("ticker_filename_market", "tickers.json")
 ticker_alias = json_dict("ticker_alias", "tickers.json")
@@ -54,6 +55,23 @@ period_selection = st.sidebar.selectbox(
     index=5,  # par défaut "YTD"
     on_change= st.cache_data.clear(),
 )
+
+# Regime selection
+regime_selection = st.sidebar.selectbox(
+    "Market Regime",
+    ["None", "Growth", "Inflation", "Specific Regime"],
+    index=1,  # par défaut "Growth"
+    on_change= st.cache_data.clear(),
+)
+
+# Specific Regime
+if regime_selection == "Specific Regime":
+    specific_regime_selection = st.sidebar.multiselect(
+        "Specific Regime",
+        ["Goldilocks", "Overheating", "Stagflation", "Deflation"],
+        default=regime_default,
+        on_change= st.cache_data.clear(),
+    )
 
 today = pd.Timestamp.today().normalize()
 if period_selection == "5D":
@@ -100,7 +118,7 @@ alias_selection_termStru = st.sidebar.multiselect(
         # ASSET PERFORMANCE UI
 #########################################
 
-st.header("Performance of selected assets")
+st.markdown("<h3 style='margin-bottom: -15px;'>Performance of selected assets</h3>", unsafe_allow_html=True)
 
 if not perf_selection:
     st.info("Select at least one ticker to display the chart.")
@@ -114,8 +132,85 @@ start_to_use = common_start if start is None else max(common_start, start)
 aligned = sub.loc[start_to_use:].dropna(how="any")                              # garde seulement les dates où TOUS les tickers ont une valeur
 
 returns_pct = (aligned / aligned.iloc[0] - 1) * 100
-st.line_chart(returns_pct.rename(columns=lambda c: ticker_alias.get(c, c)))
 
+growth_periods = json_dict("Growth", "market_regime.json")["data"]
+inflation_periods = json_dict("Inflation", "market_regime.json")["data"]
+
+growth_high_periods = extract_regime(growth_periods, "GrowthHigh")
+growth_low_periods = extract_regime(growth_periods, "GrowthLow")
+inflation_high_periods = extract_regime(inflation_periods, "InflationHigh")
+inflation_low_periods = extract_regime(inflation_periods, "InflationLow")
+
+regime_colors = {
+    "Overheating": "orange",
+    "Goldilocks": "green",
+    "Stagflation": "purple",
+    "Deflation": "blue",
+}
+
+named = returns_pct.rename(columns=lambda c: ticker_alias.get(c, c))
+
+fig = go.Figure()
+for col in named.columns:
+    fig.add_scatter(x=named.index, y=named[col], name=col, mode="lines")
+
+xmin = named.index[0]
+xmax = named.index[-1]
+
+def clipped_periods(periods):   #garde uniquement la partie des périodes qui sont dans l'intervalle à afficher
+    for p in periods:
+        s = max(pd.Timestamp(p["start"]), xmin)
+        e = min(pd.Timestamp(p["end"]),   xmax)
+        if s < e:
+            yield {"start": s, "end": e, "label": p["label"]}
+
+if regime_selection == "Growth":
+    for p in clipped_periods(growth_periods):
+        if p["label"] == "GrowthHigh":
+            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="green", opacity=0.12, line_width=0, layer="below")
+        elif p["label"] == "GrowthLow":
+            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="red", opacity=0.12, line_width=0, layer="below")
+    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="green", opacity=0.12, size=10, symbol="square"), name="Growth High")
+    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="red", opacity=0.12, size=10, symbol="square"), name="Growth Low")
+
+if regime_selection == "Inflation":
+    for p in clipped_periods(inflation_periods):
+        if p["label"] == "InflationHigh":
+            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="orange", opacity=0.10, line_width=0, layer="below")
+        elif p["label"] == "InflationLow":
+            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="blue", opacity=0.10, line_width=0, layer="below")
+    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="orange", opacity=0.10, size=10, symbol="square"), name="Inflation High")
+    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="blue", opacity=0.10, size=10, symbol="square"), name="Inflation Low")
+
+if regime_selection == "Specific Regime":
+
+    overheating_periods = inter_regime(growth_high_periods, inflation_high_periods, "Overheating")
+    goldilocks_periods  = inter_regime(growth_high_periods, inflation_low_periods,  "Goldilocks")
+    stagflation_periods = inter_regime(growth_low_periods,  inflation_high_periods, "Stagflation")
+    recession_periods   = inter_regime(growth_low_periods,  inflation_low_periods,  "Deflation")
+
+    periods_by_label = {
+    "Overheating": overheating_periods,   # [{start, end, label}, ...]
+    "Goldilocks":  goldilocks_periods,
+    "Stagflation": stagflation_periods,
+    "Deflation":   recession_periods,
+}
+
+    pre_selected_periods = [period for period in specific_regime_selection]
+    selected_periods = [period for regime in pre_selected_periods for period in periods_by_label.get(regime, [])]
+    for r in clipped_periods(selected_periods):
+        fig.add_vrect(x0=r["start"], x1=r["end"], fillcolor=regime_colors[r["label"]], opacity=0.10, line_width=0, layer="below")
+    for regime in pre_selected_periods:
+        fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color=regime_colors[regime], opacity=0.10, size=10, symbol="square"), name=regime)
+
+fig.update_layout(
+    yaxis_tickformat=".0f", 
+    yaxis_ticksuffix="%", 
+    template="plotly_white", 
+    legend=dict(orientation="h"), 
+    margin=dict(t=10, b=40, l=40, r=10)
+)
+st.plotly_chart(fig, use_container_width=True)
 
 
 #########################################
