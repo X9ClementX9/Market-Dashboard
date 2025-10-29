@@ -35,6 +35,7 @@ st.sidebar.header("Config Performance")
 # Refresh data
 if st.sidebar.button("↻ Refresh data"):
     download_data("ticker_filename_market", "tickers.json", "data_perf.csv")
+    download_market_regime()
     st.session_state.perf_selection = ticker_default_perf
     st.session_state.period_selection = date_default_perf
     st.cache_data.clear()

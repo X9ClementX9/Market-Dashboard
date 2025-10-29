@@ -158,8 +158,6 @@ def market_regime(focus_period, treeshold_entry_increase, treshold_leave_increas
 def download_market_regime():
     download_solo_ticker("TIP")
     for regime in ["Growth", "Inflation"]:
-
-        #regime_dict = json_dict(regime, "market_regime.json")
         
         with open("market_regime.json", "r") as f:
             regime_dict = json.load(f)
