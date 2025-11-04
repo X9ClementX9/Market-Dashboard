@@ -24,5 +24,27 @@
     "DGS10": 10,
     "DGS20": 20,
     "DGS30": 30
+  },
+  "OECD_Yield": {
+    "United States": 4.12,
+    "Germany": 2.6933333333333302,
+    "France": 3.51,
+    "Italy": 3.5589999999999997,
+    "United Kingdom": 4.6885,
+    "Japan": 1.645,
+    "Spain": 3.27,
+    "Portugal": 3.13,
+    "Greece": 3.39
+  },
+  "OECD_10Y": {
+    "United States": "IRLTLT01USM156N",
+    "Germany": "IRLTLT01DEM156N",
+    "France": "IRLTLT01FRM156N",
+    "Italy": "IRLTLT01ITM156N",
+    "United Kingdom": "IRLTLT01GBM156N",
+    "Japan": "IRLTLT01JPM156N",
+    "Spain": "IRLTLT01ESM156N",
+    "Portugal": "IRLTLT01PTM156N",
+    "Greece": "IRLTLT01GRM156N"
   }
 }

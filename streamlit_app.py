@@ -109,6 +109,7 @@ if st.sidebar.button("↻ Compute Again"):
     calc_term_structure([ticker_vol_termstru[ticker] for ticker in ticker_vol_termstru])
     mount_term_stru_future()
     get_yield_curve("yield.json")
+    get_oecd_10y("yield.json")
     st.session_state.ts_selection = ticker_default_termstru
     st.cache_data.clear()
     st.rerun()
@@ -131,7 +132,7 @@ alias_selection_termStru = st.sidebar.multiselect(
         # ASSET PERFORMANCE UI
 #########################################
 
-st.markdown("<h3 style='margin-bottom: -15px;'>Performance of selected assets</h3>", unsafe_allow_html=True)
+st.header("Performance of selected assets")
 
 if not perf_selection:
     st.info("Select at least one ticker to display the chart.")
@@ -230,18 +231,36 @@ st.plotly_chart(fig, use_container_width=True)
         # Yield Curve UI
 #########################################
 
-st.header("US Yield Curve")
-df_yield_curve = yield_curve("yield.json")
+col1, col2 = st.columns(2)
+with col1:
+    st.header("US Yield Curve")
+    df_yield_curve = yield_curve("yield.json")
 
-fig = go.Figure()
-fig.add_scatter(
-    x=df_yield_curve["Years"],
-    y=df_yield_curve.iloc[:, 0],
-    mode="lines+markers",
-    name="US Yield Curve"
-)
-fig.update_layout(template="plotly_white", xaxis_title="Maturity (years)", yaxis_title="Yield (%)")
-st.plotly_chart(fig, use_container_width=True)
+    fig = go.Figure()
+    fig.add_scatter(
+        x=df_yield_curve["Years"],
+        y=df_yield_curve.iloc[:, 0],
+        mode="lines+markers",
+        name="US Yield Curve"
+    )
+    fig.update_layout(xaxis_title="Maturity (years)", yaxis_title="Yield (%)")
+    st.plotly_chart(fig, use_container_width=True)
+
+with col2:
+    st.header("10-Year Government Bond Yields")
+    df_10y = oecd_10y()
+
+    fig = go.Figure(
+        go.Bar(
+            x=df_10y["Country"],
+            y=df_10y["Yield"],
+            text=[f"{v:.2f}%" for v in df_10y["Yield"]],
+            textposition="outside",
+        )
+    )
+
+    fig.update_layout(xaxis_title="Country", yaxis_title="Yield (%)")
+    st.plotly_chart(fig, use_container_width=True)
 
 #########################################
         # TERM STRUCTURE UI

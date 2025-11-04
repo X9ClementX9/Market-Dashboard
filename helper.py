@@ -221,6 +221,26 @@ def get_yield_curve(json_file, start_date="2025-01-01"):
 def yield_curve(df):
     with open("yield.json", "r") as f:
         cache = json.load(f)
-    code_to_years = cache["code_to_years"]
-    df = pd.DataFrame({"Yield": pd.Series(cache["USYield"]),"Years": pd.Series(code_to_years)}).sort_values("Years")
+    df = pd.DataFrame({"Yield": pd.Series(cache["USYield"]),"Years": pd.Series(cache["code_to_years"])}).sort_values("Years")
     return df
+
+def get_oecd_10y(json_file):
+    fred = Fred(api_key=os.environ.get("FRED_API_KEY", ""))
+    
+    with open(json_file, "r") as f:
+        cache = json.load(f)
+
+    OECD_10Y = cache["OECD_10Y"]
+    for country in OECD_10Y:
+            series = fred.get_series(OECD_10Y[country]).dropna()
+            cache["OECD_Yield"][country] = float(series.iloc[-1])
+
+    with open(json_file, "w") as f:
+        json.dump(cache, f, indent=2)
+
+def oecd_10y():
+    with open("yield.json", "r") as f:
+        cache = json.load(f)
+    data = cache["OECD_Yield"]
+    df = pd.DataFrame({"Country": list(data.keys()), "Yield": list(data.values())})
+    return df.sort_values("Yield", ascending=True)
