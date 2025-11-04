@@ -21,7 +21,8 @@ import json
 
 def download_solo_ticker(ticker):
     data = yf.download(ticker,progress=False, period="max", auto_adjust=True)['Close']
-    data.to_csv("CPI.csv")
+    if not data.empty: 
+        data.to_csv("CPI.csv")
 
 def json_dict(dict_name, file_name):    #Récupère un dict dans un fichier json
     with open(file_name, "r") as f:
@@ -39,8 +40,13 @@ def term_structure(ticker, dict_name, file_name):   #Récupère la term structur
 
 def download_data(dict_name, file_name, destination_file):      #Télécharge les données de yfinance et les sauvegarde dans un csv
     ticker_dict = json_dict(dict_name, file_name)
-    data_merge = pd.concat([yf.download(ticker,progress=False, period="max", auto_adjust=True)['Close'] for ticker in ticker_dict], axis=1)
-    data_merge.to_csv(destination_file)
+    df = pd.read_csv(destination_file, index_col=0, parse_dates=True)
+    for ticker in ticker_dict.keys():
+        data = yf.download(ticker,progress=False, period="max", auto_adjust=True)['Close'].squeeze().rename(ticker)
+        if not data.empty:
+            df = df.drop(columns=[ticker], errors='ignore').join(data, how='outer')
+    if not df.empty:
+        df.to_csv(destination_file)
 
 
 

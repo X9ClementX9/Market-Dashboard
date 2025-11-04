@@ -17,10 +17,11 @@ st.set_page_config(page_title="Market Dashboard", layout="wide")
 ticker_default_perf = ["CL=F", "ZW=F", "GC=F"]
 date_default_perf = "5Y"
 ticker_default_termstru = ["S&P 500", "Gold", "Silver","Crude Oil"]
+market_regime_default = "Growth"
 regime_default = ["Overheating", "Stagflation"]
 
 ticker_filename_market = json_dict("ticker_filename_market", "tickers.json")
-ticker_alias = json_dict("ticker_alias", "tickers.json")
+ticker_labels = json_dict("ticker_filename_market", "tickers.json")
 ticker_vol_termstru = json_dict("ticker_vol_termstru", "tickers.json")
 ticker_fut_termstru = json_dict("ticker_fut_termstru", "tickers.json")
 
@@ -38,6 +39,8 @@ if st.sidebar.button("↻ Refresh data"):
     download_market_regime()
     st.session_state.perf_selection = ticker_default_perf
     st.session_state.period_selection = date_default_perf
+    st.session_state.regime_selection = market_regime_default
+    st.session_state.specific_regime_selection = []
     st.cache_data.clear()
     st.rerun()
 
@@ -47,14 +50,15 @@ perf_selection = st.sidebar.multiselect(
     "Asset",
     all_tickers,
     default=ticker_default_perf,
-    format_func=lambda t: ticker_alias.get(t, t), # affiche l’alias dans la liste
+    format_func=lambda t: ticker_filename_market[t], # affiche l’alias dans la liste
 )
 # Date selection
 period_selection = st.sidebar.selectbox(
     "Period",
     ["5D", "1M", "6M", "YTD", "1Y", "5Y", "MAX"],
     index=5,  # par défaut "YTD"
-    on_change= st.cache_data.clear(),
+    key="period_selection",
+    on_change= st.cache_data.clear,
 )
 
 # Regime selection
@@ -62,7 +66,8 @@ regime_selection = st.sidebar.selectbox(
     "Market Regime",
     ["None", "Growth", "Inflation", "Specific Regime"],
     index=1,  # par défaut "Growth"
-    on_change= st.cache_data.clear(),
+    key="regime_selection",
+    on_change= st.cache_data.clear,
 )
 
 # Specific Regime
@@ -71,7 +76,7 @@ if regime_selection == "Specific Regime":
         "Specific Regime",
         ["Goldilocks", "Overheating", "Stagflation", "Deflation"],
         default=regime_default,
-        on_change= st.cache_data.clear(),
+        on_change= st.cache_data.clear,
     )
 
 today = pd.Timestamp.today().normalize()
@@ -149,7 +154,7 @@ regime_colors = {
     "Deflation": "blue",
 }
 
-named = returns_pct.rename(columns=lambda c: ticker_alias.get(c, c))
+named = returns_pct.rename(columns=lambda c: ticker_labels.get(c, c))
 
 fig = go.Figure()
 for col in named.columns:
@@ -222,7 +227,7 @@ st.plotly_chart(fig, use_container_width=True)
 alias_by_ticker = {}
 alias_by_ticker.update({t: a for a, t in ticker_vol_termstru.items()})
 alias_by_ticker.update({t: a for a, t in ticker_fut_termstru.items()})
-alias_by_ticker.update(ticker_alias)
+alias_by_ticker.update(ticker_labels)
                        
 col1, col2 = st.columns(2)
 with col1:

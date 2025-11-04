@@ -1,22 +1,10 @@
 {
   "ticker_filename_market": {
-    "SPY": "Data/spy.csv",
-    "DX-Y.NYB": "Data/usd.csv",
-    "CL=F": "Data/oil.csv",
-    "ZW=F": "Data/wheat.csv",
-    "GC=F": "Data/gold.csv"
-  },
-
-  "ticker_alias": {
     "SPY": "S&P 500",
     "DX-Y.NYB": "Dollar Index",
     "CL=F": "Crude Oil",
     "ZW=F": "Wheat",
-    "GC=F": "Gold",
-    "^VIX": "VIX",
-    "^GVZ": "Gold Volatility",
-    "^EVZ": "Euro Volatility",
-    "MOVE": "MOVE Index"
+    "GC=F": "Gold"
   },
 
   "ticker_vol_termstru": {
