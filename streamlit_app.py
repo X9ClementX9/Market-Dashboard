@@ -44,19 +44,25 @@ if st.sidebar.button("↻ Refresh data"):
     st.cache_data.clear()
     st.rerun()
 
+if "perf_selection" not in st.session_state:
+    st.session_state["perf_selection"] = ticker_default_perf
+
+if "period_selection" not in st.session_state:
+    st.session_state["period_selection"] = "5Y"
+
 # Ticker selection
 all_tickers = list(ticker_filename_market.keys())
 perf_selection = st.sidebar.multiselect(
     "Asset",
     all_tickers,
-    default=ticker_default_perf,
+    #default=ticker_default_perf,
+    key="perf_selection",
     format_func=lambda t: ticker_filename_market[t], # affiche l’alias dans la liste
 )
 # Date selection
 period_selection = st.sidebar.selectbox(
     "Period",
     ["5D", "1M", "6M", "YTD", "1Y", "5Y", "MAX"],
-    index=5,  # par défaut "YTD"
     key="period_selection",
     on_change= st.cache_data.clear,
 )
@@ -102,6 +108,7 @@ st.sidebar.subheader("Config Term Structure")
 if st.sidebar.button("↻ Compute Again"):
     calc_term_structure([ticker_vol_termstru[ticker] for ticker in ticker_vol_termstru])
     mount_term_stru_future()
+    get_yield_curve("yield.json")
     st.session_state.ts_selection = ticker_default_termstru
     st.cache_data.clear()
     st.rerun()
@@ -218,6 +225,23 @@ fig.update_layout(
 )
 st.plotly_chart(fig, use_container_width=True)
 
+
+#########################################
+        # Yield Curve UI
+#########################################
+
+st.header("US Yield Curve")
+df_yield_curve = yield_curve("yield.json")
+
+fig = go.Figure()
+fig.add_scatter(
+    x=df_yield_curve["Years"],
+    y=df_yield_curve.iloc[:, 0],
+    mode="lines+markers",
+    name="US Yield Curve"
+)
+fig.update_layout(template="plotly_white", xaxis_title="Maturity (years)", yaxis_title="Yield (%)")
+st.plotly_chart(fig, use_container_width=True)
 
 #########################################
         # TERM STRUCTURE UI

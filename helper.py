@@ -4,6 +4,8 @@ import pandas as pd
 import numpy as np
 import math
 import json
+from fredapi import Fred
+import os
 
 ##############################################################################
 
@@ -194,3 +196,31 @@ def inter_regime(periods1, periods2, label):
         else:
             y += 1
     return intersection_period
+
+
+##############################################################################
+
+                            ### Yield Curve ###                              
+
+##############################################################################
+
+def get_yield_curve(json_file, start_date="2025-01-01"):
+    fred = Fred(api_key=os.environ.get("FRED_API_KEY", ""))
+    
+    with open(json_file, "r") as f:
+            cache = json.load(f)
+    
+    code_to_years = cache["code_to_years"]
+    for code in code_to_years:
+        series = fred.get_series(code, observation_start=start_date)
+        cache["USYield"][code] = float(series.iloc[-1])
+    
+    with open(json_file, "w") as f:
+        json.dump(cache, f, indent=2)
+
+def yield_curve(df):
+    with open("yield.json", "r") as f:
+        cache = json.load(f)
+    code_to_years = cache["code_to_years"]
+    df = pd.DataFrame({"Yield": pd.Series(cache["USYield"]),"Years": pd.Series(code_to_years)}).sort_values("Years")
+    return df
