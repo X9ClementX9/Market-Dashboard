@@ -37,6 +37,7 @@ st.sidebar.header("Config Performance")
 if st.sidebar.button("↻ Refresh data"):
     download_data("ticker_filename_market", "tickers.json", "data_perf.csv")
     download_market_regime()
+    calculate_historical_VolSkew()
     st.session_state.perf_selection = ticker_default_perf
     st.session_state.period_selection = date_default_perf
     st.session_state.regime_selection = market_regime_default
@@ -48,7 +49,13 @@ if "perf_selection" not in st.session_state:
     st.session_state["perf_selection"] = ticker_default_perf
 
 if "period_selection" not in st.session_state:
-    st.session_state["period_selection"] = "5Y"
+    st.session_state["period_selection"] = date_default_perf
+
+if "regime_selection" not in st.session_state:
+    st.session_state["regime_selection"] = market_regime_default
+
+if "specific_regime_selection" not in st.session_state:
+    st.session_state["specific_regime_selection"] = regime_default
 
 # Ticker selection
 all_tickers = list(ticker_filename_market.keys())
@@ -71,7 +78,6 @@ period_selection = st.sidebar.selectbox(
 regime_selection = st.sidebar.selectbox(
     "Market Regime",
     ["None", "Growth", "Inflation", "Specific Regime"],
-    index=1,  # par défaut "Growth"
     key="regime_selection",
     on_change= st.cache_data.clear,
 )
@@ -226,6 +232,34 @@ fig.update_layout(
 )
 st.plotly_chart(fig, use_container_width=True)
 
+col1, col2 = st.columns(2)
+with col1:
+    vsku = pd.read_csv("data_VolSkew.csv", index_col=0, parse_dates=True)
+
+    vol_cols = [f"{t}_Vol" for t in perf_selection if f"{t}_Vol" in vsku.columns]
+    sku_cols = [f"{t}_Skew" for t in perf_selection if f"{t}_Skew" in vsku.columns]
+
+    vol_al = vsku.loc[aligned.index, vol_cols].dropna(how="all")
+    sku_al = vsku.loc[aligned.index, sku_cols].dropna(how="all")
+
+    # VOL
+    fig_vol = go.Figure()
+    for col in vol_al.columns:
+        t = col.rsplit("_", 1)[0]
+        fig_vol.add_scatter(x=vol_al.index, y=vol_al[col], mode="lines",
+                            name=ticker_labels.get(t, t))
+    fig_vol.update_layout(template="plotly_white", title="Volatility of selected assets", title_font_size=22)
+    st.plotly_chart(fig_vol, use_container_width=True)
+
+with col2:
+    # SKU
+    fig_sku = go.Figure()
+    for col in sku_al.columns:
+        t = col.rsplit("_", 1)[0]
+        fig_sku.add_scatter(x=sku_al.index, y=sku_al[col], mode="lines",
+                            name=ticker_labels.get(t, t))
+    fig_sku.update_layout(template="plotly_white", title="Skew of selected assets", title_font_size=22)
+    st.plotly_chart(fig_sku, use_container_width=True)
 
 #########################################
         # Yield Curve UI

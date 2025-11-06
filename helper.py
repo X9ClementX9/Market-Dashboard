@@ -244,3 +244,35 @@ def oecd_10y():
     data = cache["OECD_Yield"]
     df = pd.DataFrame({"Country": list(data.keys()), "Yield": list(data.values())})
     return df.sort_values("Yield", ascending=True)
+
+##############################################################################
+
+                            ### Vol & Skew ###                              
+
+##############################################################################
+
+def calculate_historical_VolSkew(tickers = list(json_dict("ticker_filename_market", "tickers.json").keys()), file_path="data_perf.csv", destination_file="data_VolSkew.csv", obs_time_vol = 20, obs_time_skew = 20):    
+    for ticker in tickers:
+        df_ticker = get_ticker_data(ticker, file_path)
+        df_VolSkew = pd.read_csv(destination_file)
+
+        returns = np.log(df_ticker.iloc[:, 0]).diff()
+        vol_series = returns.rolling(obs_time_vol).std() * np.sqrt(252)
+        skew_series = returns.rolling(obs_time_skew).skew()
+        col_name_vol = f"{ticker}_Vol"
+        col_name_skew = f"{ticker}_Skew"
+        data_vol = vol_series.dropna().to_frame(name=col_name_vol).reset_index()
+        data_skew = skew_series.dropna().to_frame(name=col_name_skew).reset_index()
+
+        if not data_vol.empty:
+            df_VolSkew = df_VolSkew.drop(columns=col_name_vol, errors='ignore')
+            df_VolSkew = pd.merge(df_VolSkew, data_vol, on="Date", how="outer")
+
+        if not data_skew.empty:
+            df_VolSkew = df_VolSkew.drop(columns=col_name_skew, errors='ignore')
+            df_VolSkew = pd.merge(df_VolSkew, data_skew, on="Date", how="outer")  
+
+        if not df_VolSkew.empty:
+            df_VolSkew.to_csv(destination_file, index=False)
+
+    df_VolSkew = df_VolSkew[["Date"] + [c for c in df_VolSkew.columns if c != "Date"]]
