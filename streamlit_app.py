@@ -361,3 +361,23 @@ with col2:
                 st.altair_chart(chart.properties(height=360.), use_container_width=False)
         except Exception:
             st.warning("Please select tickers compatible with futures term structure.")
+
+
+#########################################
+        # Correlation Matrix
+#########################################
+
+df = pd.read_csv("data_perf.csv", index_col=0, parse_dates=True)
+returns = df.pct_change().dropna()
+corr = returns.corr()
+corr = corr.rename(index=ticker_filename_market, columns=ticker_filename_market)
+
+st.header("Correlation Matrix")
+st.table(
+    corr.style
+        .format(precision=2)
+        .background_gradient(cmap="coolwarm")
+        .set_table_styles(
+            [{"selector": "th", "props": [("white-space", "nowrap")]}]
+        )
+)
