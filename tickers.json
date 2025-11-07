@@ -1,10 +1,16 @@
 {
   "ticker_filename_market": {
     "SPY": "S&P 500",
+    "QQQ": "Nasdaq-100",
+    "VTI": "US Stock Market",
+    "DAX": "DAX",
     "DX-Y.NYB": "Dollar Index",
+    "EURUSD=X": "EUR/USD",
+    "MOVE": "MOVE Index",
     "CL=F": "Crude Oil",
     "ZW=F": "Wheat",
-    "GC=F": "Gold"
+    "GC=F": "Gold",
+    "SI=F": "Silver"
   },
 
   "ticker_vol_termstru": {
@@ -14,7 +20,7 @@
     "Gold": "GLD",
     "Silver": "SLV",
     "Crude Oil": "USO",
-    "US Treasury Bonds 20+ Years": "TLT",
+    "US Bonds +20Y": "TLT",
     "US Energy": "XLE"
   },
 
