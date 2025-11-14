@@ -187,20 +187,20 @@ def clipped_periods(periods):   #garde uniquement la partie des périodes qui so
 if regime_selection == "Growth":
     for p in clipped_periods(growth_periods):
         if p["label"] == "GrowthHigh":
-            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="green", opacity=0.12, line_width=0, layer="below")
+            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="green", opacity=0.25, line_width=0, layer="below")
         elif p["label"] == "GrowthLow":
-            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="red", opacity=0.12, line_width=0, layer="below")
-    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="green", opacity=0.12, size=10, symbol="square"), name="Growth High")
-    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="red", opacity=0.12, size=10, symbol="square"), name="Growth Low")
+            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="red", opacity=0.25, line_width=0, layer="below")
+    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="green", opacity=0.25, size=10, symbol="square"), name="Growth High")
+    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="red", opacity=0.25, size=10, symbol="square"), name="Growth Low")
 
 if regime_selection == "Inflation":
     for p in clipped_periods(inflation_periods):
         if p["label"] == "InflationHigh":
-            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="orange", opacity=0.10, line_width=0, layer="below")
+            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="orange", opacity=0.25, line_width=0, layer="below")
         elif p["label"] == "InflationLow":
-            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="blue", opacity=0.10, line_width=0, layer="below")
-    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="orange", opacity=0.10, size=10, symbol="square"), name="Inflation High")
-    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="blue", opacity=0.10, size=10, symbol="square"), name="Inflation Low")
+            fig.add_vrect(x0=p["start"], x1=p["end"], fillcolor="blue", opacity=0.25, line_width=0, layer="below")
+    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="orange", opacity=0.25, size=10, symbol="square"), name="Inflation High")
+    fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color="blue", opacity=0.25, size=10, symbol="square"), name="Inflation Low")
 
 if regime_selection == "Specific Regime":
 
@@ -219,9 +219,9 @@ if regime_selection == "Specific Regime":
     pre_selected_periods = [period for period in specific_regime_selection]
     selected_periods = [period for regime in pre_selected_periods for period in periods_by_label.get(regime, [])]
     for r in clipped_periods(selected_periods):
-        fig.add_vrect(x0=r["start"], x1=r["end"], fillcolor=regime_colors[r["label"]], opacity=0.10, line_width=0, layer="below")
+        fig.add_vrect(x0=r["start"], x1=r["end"], fillcolor=regime_colors[r["label"]], opacity=0.25, line_width=0, layer="below")
     for regime in pre_selected_periods:
-        fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color=regime_colors[regime], opacity=0.10, size=10, symbol="square"), name=regime)
+        fig.add_scatter(x=[None], y=[None], mode="markers", marker=dict(color=regime_colors[regime], opacity=0.25, size=10, symbol="square"), name=regime)
 
 fig.update_layout(
     yaxis_tickformat=".0f", 
