@@ -75,7 +75,7 @@ def get_future_price(dict_cat, ticker_base):  #Return the index of expiration co
     for year in year_range:
         for expiration_code in dict_cat["Expiration_date_codes"]:
             try:
-                ticker = f"{ticker_base}{expiration_code}{str(year)[-2:]}{dict_cat["ticker_ending"]}"
+                ticker = f"{ticker_base}{expiration_code}{str(year)[-2:]}{dict_cat['ticker_ending']}"
                 price = yf.download(ticker, period="15d", progress=False)['Close'].iloc[-1, -1]
                 return (year, dict_cat["Expiration_date_codes"].index(expiration_code))
             except Exception:
