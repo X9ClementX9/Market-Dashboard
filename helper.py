@@ -110,10 +110,10 @@ def ticker_in_date(year, expiration_code): #Tranform future expriration code int
 def close_period(start_increase, start_decrease, last_day, period, data_frame, regime_type):# Ferme le dernier segment si ce n'étais pas le cas
     if start_increase != None:
         end = data_frame.iloc[last_day].name
-        period.append({ "start": start_increase, "end": end, "label": f"{regime_type}{"High"}" })
+        period.append({ "start": start_increase, "end": end, "label": f"{regime_type}High" })
     if start_decrease != None:
         end = data_frame.iloc[last_day].name
-        period.append({ "start": start_decrease, "end": end, "label": f"{regime_type}{"Low"}" })    
+        period.append({ "start": start_decrease, "end": end, "label": f"{regime_type}Low" })    
 
 def join_short_period(period, nbr_days_fusion):    # Join les petites periodes de temps (fausse sortie)
     i = 0
