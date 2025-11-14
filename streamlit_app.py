@@ -17,7 +17,7 @@ st.set_page_config(page_title="Market Dashboard", layout="wide")
 ticker_default_perf = ["CL=F", "ZW=F", "GC=F"]
 date_default_perf = "5Y"
 ticker_default_termstru = ["S&P 500", "Gold", "Silver","Crude Oil"]
-market_regime_default = "Growth"
+market_regime_default = "None"
 regime_default = ["Overheating", "Stagflation"]
 
 ticker_filename_market = json_dict("ticker_filename_market", "tickers.json")
