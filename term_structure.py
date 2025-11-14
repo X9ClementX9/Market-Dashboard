@@ -92,7 +92,7 @@ def calc_term_structure_future(dict_cat):    #Return the term structure of futur
                 expiration_code = dict_cat["Expiration_date_codes"][idx_expi_month]
                 
                 try:
-                    ticker = f"{asset}{expiration_code}{str(year)[-2:]}{dict_cat["ticker_ending"]}"
+                    ticker = f"{asset}{expiration_code}{str(year)[-2:]}{dict_cat['ticker_ending']}"
                     price = yf.download(ticker, period="15d", progress=False)['Close'].iloc[-1, -1]
                     term_structure_future[asset][ticker_in_date(year, expiration_code)] = round(float(price), 2)
                 except Exception:
