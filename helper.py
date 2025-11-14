@@ -143,7 +143,7 @@ def market_regime(focus_period, treeshold_entry_increase, treshold_leave_increas
         # Condition pour sortie Increase
         elif performance < treshold_leave_increase and performance_last < treshold_leave_increase and start_increase != None:
             end = data_frame.iloc[day].name
-            period.append({"start": pd.Timestamp(start_increase).strftime("%Y-%m-%d"), "end": pd.Timestamp(end).strftime("%Y-%m-%d"), "label": f"{regime_type}{"High"}"})
+            period.append({"start": pd.Timestamp(start_increase).strftime("%Y-%m-%d"), "end": pd.Timestamp(end).strftime("%Y-%m-%d"), "label": f"{regime_type}High"})
             start_increase = None
 
         # Condition d'entrée Decrease
@@ -153,7 +153,7 @@ def market_regime(focus_period, treeshold_entry_increase, treshold_leave_increas
         # Condition pour sortie Decrease
         elif performance > treshold_leave_decrease and performance_last > treshold_leave_decrease and start_decrease != None:
             end = data_frame.iloc[day].name
-            period.append({ "start": pd.Timestamp(start_decrease).strftime("%Y-%m-%d"), "end": pd.Timestamp(end).strftime("%Y-%m-%d"), "label": f"{regime_type}{"Low"}"})
+            period.append({ "start": pd.Timestamp(start_decrease).strftime("%Y-%m-%d"), "end": pd.Timestamp(end).strftime("%Y-%m-%d"), "label": f"{regime_type}Low"})
             start_decrease = None
 
         day += 1
