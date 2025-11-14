@@ -368,7 +368,7 @@ with col2:
 #########################################
 
 df = pd.read_csv("data_perf.csv", index_col=0, parse_dates=True)
-returns = df.pct_change().dropna()
+returns = np.log(df / df.shift(1)).dropna()
 corr = returns.corr()
 corr = corr.rename(index=ticker_filename_market, columns=ticker_filename_market)
 

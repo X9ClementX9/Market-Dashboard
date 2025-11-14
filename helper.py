@@ -6,6 +6,7 @@ import math
 import json
 from fredapi import Fred
 import os
+from dotenv import load_dotenv
 
 ##############################################################################
 
@@ -205,6 +206,7 @@ def inter_regime(periods1, periods2, label):
 ##############################################################################
 
 def get_yield_curve(json_file, start_date="2025-01-01"):
+    load_dotenv()
     fred = Fred(api_key=os.environ.get("FRED_API_KEY", ""))
     
     with open(json_file, "r") as f:
@@ -225,6 +227,7 @@ def yield_curve(df):
     return df
 
 def get_oecd_10y(json_file):
+    load_dotenv()
     fred = Fred(api_key=os.environ.get("FRED_API_KEY", ""))
     
     with open(json_file, "r") as f:
