@@ -7,6 +7,7 @@ from term_structure import *
 import plotly.express as px
 import altair as alt
 import plotly.graph_objects as go
+from daily_update import *
 
 #########################################
                # SETUP
@@ -35,9 +36,7 @@ st.sidebar.header("Config Performance")
 
 # Refresh data
 if st.sidebar.button("↻ Refresh data"):
-    download_data("ticker_filename_market", "tickers.json", "data_perf.csv")
-    download_market_regime()
-    calculate_historical_VolSkew()
+    refresh_data()
     st.session_state.perf_selection = ticker_default_perf
     st.session_state.period_selection = date_default_perf
     st.session_state.regime_selection = market_regime_default
@@ -112,10 +111,7 @@ st.sidebar.subheader("Config Term Structure")
 
 #Bouton pour recalculer
 if st.sidebar.button("↻ Compute Again"):
-    calc_term_structure([ticker_vol_termstru[ticker] for ticker in ticker_vol_termstru])
-    mount_term_stru_future()
-    get_yield_curve("yield.json")
-    get_oecd_10y("yield.json")
+    compute_again()
     st.session_state.ts_selection = ticker_default_termstru
     st.cache_data.clear()
     st.rerun()
