@@ -208,9 +208,13 @@ def inter_regime(periods1, periods2, label):
 
 def get_yield_curve(json_file, start_date="2025-01-01"):
     load_dotenv()
-    fred_key = st.secrets.get("FRED_API_KEY") or os.getenv("FRED_API_KEY")
+
+    try:
+        fred_key = st.secrets["FRED_API_KEY"]
+    except Exception:
+        fred_key = os.getenv("FRED_API_KEY")
     fred = Fred(api_key=fred_key)
-    
+
     with open(json_file, "r") as f:
             cache = json.load(f)
     
@@ -230,7 +234,11 @@ def yield_curve(df):
 
 def get_oecd_10y(json_file):
     load_dotenv()
-    fred_key = st.secrets.get("FRED_API_KEY") or os.getenv("FRED_API_KEY")
+
+    try:
+        fred_key = st.secrets["FRED_API_KEY"]
+    except Exception:
+        fred_key = os.getenv("FRED_API_KEY")
     fred = Fred(api_key=fred_key)
     
     with open(json_file, "r") as f:
