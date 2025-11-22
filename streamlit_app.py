@@ -134,7 +134,7 @@ alias_selection_termStru = st.sidebar.multiselect(
         # ASSET PERFORMANCE UI
 #########################################
 
-st.header("Performance of selected assets")
+st.subheader("Log Returns of Selected Assets with Market Regimes")
 
 if not perf_selection:
     st.info("Select at least one ticker to display the chart.")
@@ -263,7 +263,7 @@ with col2:
 
 col1, col2 = st.columns(2)
 with col1:
-    st.header("US Yield Curve")
+    st.subheader("US Yield Curve")
     df_yield_curve = yield_curve("yield.json")
 
     fig = go.Figure()
@@ -277,7 +277,7 @@ with col1:
     st.plotly_chart(fig, use_container_width=True)
 
 with col2:
-    st.header("10-Year Government Bond Yields")
+    st.subheader("10-Year Government Bond Yields")
     df_10y = oecd_10y()
 
     fig = go.Figure(
@@ -304,7 +304,7 @@ alias_by_ticker.update(ticker_labels)
                        
 col1, col2 = st.columns(2)
 with col1:
-    st.header("Term Structure of Implied Volatility")
+    st.subheader("Term Structure of Implied Volatility")
 
     iv_tickers = [ticker_vol_termstru[a] for a in alias_selection_termStru if a in ticker_vol_termstru]
 
@@ -328,7 +328,7 @@ with col1:
             st.altair_chart(chart.properties(height=360), use_container_width=False)
 
 with col2:
-    st.header("Normalized Futures Term Structure")
+    st.subheader("Normalized Futures Term Structure")
 
     fut_tickers = [ticker_fut_termstru[a] for a in alias_selection_termStru if a in ticker_fut_termstru]
 
@@ -366,10 +366,14 @@ with col2:
 df = pd.read_csv("data_perf.csv", index_col=0, parse_dates=True)
 serie = (df / df.shift(1)).replace([np.inf, -np.inf, 0], np.nan)
 returns = np.log(serie[serie > 0]).dropna()
+
+cutoff = returns.index.max() - pd.DateOffset(years=1)
+returns = returns[returns.index >= cutoff]
+
 corr = returns.corr()
 corr = corr.rename(index=ticker_filename_market, columns=ticker_filename_market)
 
-st.header("Correlation Matrix")
+st.subheader("Correlation Matrix Over 1 Year")
 st.table(
     corr.style
         .format(precision=2)
