@@ -1,16 +1,16 @@
 {
   "USYield": {
-    "DGS1": 4.35,
-    "DGS2": 4.63,
-    "DGS10": 4.96,
-    "DGS1MO": 3.93,
-    "DGS3MO": 4.07,
-    "DGS6MO": 4.12,
-    "DGS3": 4.69,
-    "DGS5": 4.78,
-    "DGS7": 4.87,
-    "DGS20": 5.38,
-    "DGS30": 5.35
+    "DGS1": 4.37,
+    "DGS2": 4.65,
+    "DGS10": 4.97,
+    "DGS1MO": 3.94,
+    "DGS3MO": 4.11,
+    "DGS6MO": 4.18,
+    "DGS3": 4.73,
+    "DGS5": 4.8,
+    "DGS7": 4.88,
+    "DGS20": 5.37,
+    "DGS30": 5.34
   },
   "code_to_years": {
     "DGS1MO": 0.0833,
@@ -26,15 +26,15 @@
     "DGS30": 30
   },
   "OECD_Yield": {
-    "United States": 4.47,
-    "Germany": 2.97,
-    "France": 3.68,
-    "Italy": 3.734,
-    "United Kingdom": 4.796,
-    "Japan": 2.67,
-    "Spain": 3.42119047619048,
-    "Portugal": 3.33,
-    "Greece": 3.65
+    "United States": 4.68,
+    "Germany": 3.18,
+    "France": 4.0,
+    "Italy": 3.98598,
+    "United Kingdom": 4.9886,
+    "Japan": 2.94,
+    "Spain": 3.633,
+    "Portugal": 3.44,
+    "Greece": 3.87
   },
   "OECD_10Y": {
     "United States": "IRLTLT01USM156N",
