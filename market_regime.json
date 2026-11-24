@@ -636,6 +636,11 @@
             "start": "2026-05-06",
             "end": "2026-08-25",
             "label": "GrowthHigh"
+         },
+         {
+            "start": "2026-11-20",
+            "end": "2026-11-23",
+            "label": "GrowthLow"
          }
       ]
    },
